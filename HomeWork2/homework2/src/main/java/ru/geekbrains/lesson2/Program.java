@@ -1,3 +1,10 @@
+/**
+ * Программа реализует игру крестики-нолики
+ * произвольного размера, в т.ч. прямоугольное поле
+ * и настраиваемое количество символов,
+ * которые необходимо поставить подряд
+ */
+
 package ru.geekbrains.lesson2;
 
 import java.util.Random;
@@ -6,13 +13,13 @@ import java.util.Scanner;
 public class Program {
 
 
-    private static final int WIN_COUNT = 4;
+    private static final int WIN_COUNT = 4; // кол-во символов для выигрыша
     private static final char DOT_HUMAN = 'X';
     private static final char DOT_AI = 'O';
     private static final char DOT_EMPTY = '•';
 
-    private static final int SIZE_ROW = 9;
-    private static final int SIZE_COL = 9;
+    private static final int SIZE_ROW = 5; // количество строк поля
+    private static final int SIZE_COL = 9; // количество столбцов поля
 
 
     private static final Scanner SCANNER = new Scanner(System.in);
@@ -100,7 +107,7 @@ public class Program {
     private static void humanTurn() {
         int x, y;
         do {
-            System.out.print("Введите координаты хода X и Y (от 1 до 3) через пробел >>> ");
+            System.out.printf("Введите координаты хода X (от 1 до %d) и Y (от 1 до %d) через пробел >>> ",fieldSizeRow,fieldSizeCol);
             x = SCANNER.nextInt() - 1;
             y = SCANNER.nextInt() - 1;
         }
@@ -204,29 +211,34 @@ public class Program {
 
         // Проверка по горизонталям
         for (int i = 0; i < fieldSizeRow; i++) {
-            if (checkCountSymbolNew(DOT_HUMAN, i, 0, 1) == WIN_COUNT || checkCountSymbolNew(DOT_AI, i, 0, 1) == WIN_COUNT) {
+            if (checkCountSymbolNew(c, i, 0, 1) == WIN_COUNT) {
+                // || checkCountSymbolNew(DOT_AI, i, 0, 1) == WIN_COUNT) {
                 return true;
             }
         }
 
         // Проверка по вертикалям
         for (int j = 0; j < fieldSizeCol; j++) {
-            if (checkCountSymbolNew(DOT_HUMAN, 0, j, 2) == WIN_COUNT || checkCountSymbolNew(DOT_AI, 0, j, 2) == WIN_COUNT)
+            if (checkCountSymbolNew(c, 0, j, 2) == WIN_COUNT) {
+                // || checkCountSymbolNew(DOT_AI, 0, j, 2) == WIN_COUNT)
                 return true;
+            }
         }
 
 
         // Проверка по прямым диагоналям
         // часть 1
         for (int j = fieldSizeCol - 1; j >= 0; j--) {
-            if (checkCountSymbolNew(DOT_HUMAN, 0, j, 3) == WIN_COUNT || checkCountSymbolNew(DOT_AI, 0, j, 3) == WIN_COUNT) {
+            if (checkCountSymbolNew(c, 0, j, 3) == WIN_COUNT) {
+                // || checkCountSymbolNew(DOT_AI, 0, j, 3) == WIN_COUNT) {
                 return true;
             }
         }
 
         // часть 2
         for (int i = 0; i < fieldSizeRow; i++) {
-            if (checkCountSymbolNew(DOT_HUMAN, i, 0, 3) == WIN_COUNT || checkCountSymbolNew(DOT_AI, i, 0, 3) == WIN_COUNT) {
+            if (checkCountSymbolNew(c, i, 0, 3) == WIN_COUNT) {
+                // || checkCountSymbolNew(DOT_AI, i, 0, 3) == WIN_COUNT) {
                 return true;
             }
         }
@@ -234,14 +246,16 @@ public class Program {
         // Проверка по обратным диагоналям
         // часть 1
         for (int j = 0; j < fieldSizeCol; j++) {
-            if (checkCountSymbolNew(DOT_HUMAN, 0, j, 4) == WIN_COUNT || checkCountSymbolNew(DOT_AI, 0, j, 4) == WIN_COUNT) {
+            if (checkCountSymbolNew(c, 0, j, 4) == WIN_COUNT) {
+                // || checkCountSymbolNew(DOT_AI, 0, j, 4) == WIN_COUNT) {
                 return true;
             }
         }
 
         // часть 2
         for (int i = 1; i < fieldSizeRow; i++) {
-            if (checkCountSymbolNew(DOT_HUMAN, i, fieldSizeRow - 1, 4) == WIN_COUNT || checkCountSymbolNew(DOT_AI, i, fieldSizeRow - 1, 4) == WIN_COUNT) {
+            if (checkCountSymbolNew(c, i, fieldSizeCol - 1, 4) == WIN_COUNT) {
+                // || checkCountSymbolNew(DOT_AI, i, fieldSizeCol - 1, 4) == WIN_COUNT) {
                 return true;
             }
         }
@@ -252,7 +266,7 @@ public class Program {
     /**
      * Проверка на ничью
      *
-     * @return
+     * @return признак заполненности поля - т.е. ничьей
      */
     static boolean checkDraw() {
         for (int x = 0; x < fieldSizeRow; x++) {
@@ -265,9 +279,9 @@ public class Program {
     /**
      * Метод проверки состояния игры
      *
-     * @param c
-     * @param str
-     * @return
+     * @param c символ для проверки (или DOT_HUMAN или DOT_AI
+     * @param str выводимая строка в случае чьей-то победы
+     * @return признак того, что есть выигравший игрок
      */
     static boolean gameCheck(char c, String str) {
         if (checkWin(c)) {
