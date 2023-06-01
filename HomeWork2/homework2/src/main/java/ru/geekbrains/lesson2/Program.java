@@ -11,8 +11,8 @@ public class Program {
     private static final char DOT_AI = 'O';
     private static final char DOT_EMPTY = '•';
 
-    private static final int SIZE_X = 5;
-    private static final int SIZE_Y = 5;
+    private static final int SIZE_ROW = 9;
+    private static final int SIZE_COL = 9;
 
 
     private static final Scanner SCANNER = new Scanner(System.in);
@@ -21,15 +21,15 @@ public class Program {
 
     private static final Random random = new Random();
 
-    private static int fieldSizeX; // Размерность игрового поля
-    private static int fieldSizeY; // Размерность игрового поля
+    private static int fieldSizeRow; // Размерность игрового поля
+    private static int fieldSizeCol; // Размерность игрового поля
 
 
     public static void main(String[] args) {
-        while (true){
+        while (true) {
             initialize();
             printField();
-            while (true){
+            while (true) {
                 humanTurn();
                 printField();
                 if (gameCheck(DOT_HUMAN, "Вы победили!"))
@@ -48,16 +48,16 @@ public class Program {
     /**
      * Инициализация игрового поля
      */
-    private static void initialize(){
+    private static void initialize() {
         // Установим размерность игрового поля
-        fieldSizeX = SIZE_X;
-        fieldSizeY = SIZE_Y;
+        fieldSizeRow = SIZE_ROW;
+        fieldSizeCol = SIZE_COL;
 
 
-        field = new char[fieldSizeX][fieldSizeY];
+        field = new char[fieldSizeRow][fieldSizeCol];
         // Пройдем по всем элементам массива
-        for (int x = 0; x < fieldSizeX; x++) {
-            for (int y = 0; y < fieldSizeY; y++) {
+        for (int x = 0; x < fieldSizeRow; x++) {
+            for (int y = 0; y < fieldSizeCol; y++) {
                 // Проинициализируем все элементы массива DOT_EMPTY (признак пустого поля)
                 field[x][y] = DOT_EMPTY;
             }
@@ -68,26 +68,26 @@ public class Program {
      * Отрисовка игрового поля
      * //TODO: Поправить отрисовку игрового поля
      */
-    private static void printField(){
+    private static void printField() {
         // печатаем шапку поля
         System.out.print("+");
-        for (int i = 0; i < fieldSizeY * 2 + 1; i++){
+        for (int i = 0; i < fieldSizeCol * 2 + 1; i++) {
             System.out.print((i % 2 == 0) ? "-" : i / 2 + 1);
         }
         System.out.println();
 
         // выводим само поле
-        for (int i = 0; i < fieldSizeX; i++){
+        for (int i = 0; i < fieldSizeRow; i++) {
             System.out.print(i + 1 + "|");
 
-            for (int j = 0; j <  fieldSizeY; j++)
+            for (int j = 0; j < fieldSizeCol; j++)
                 System.out.print(field[i][j] + "|");
 
             System.out.println();
         }
 
         // отрисовываем подвал
-        for (int i = 0; i < fieldSizeX * 2 + 2; i++){
+        for (int i = 0; i < fieldSizeCol * 2 + 2; i++) {
             System.out.print("-");
         }
         System.out.println();
@@ -97,10 +97,9 @@ public class Program {
     /**
      * Обработка хода игрока (человек)
      */
-    private static void humanTurn(){
+    private static void humanTurn() {
         int x, y;
-        do
-        {
+        do {
             System.out.print("Введите координаты хода X и Y (от 1 до 3) через пробел >>> ");
             x = SCANNER.nextInt() - 1;
             y = SCANNER.nextInt() - 1;
@@ -111,70 +110,153 @@ public class Program {
 
     /**
      * Проверка, ячейка является пустой
+     *
      * @param x количество строк поля
      * @param y количество столбцов поля
      * @return проверка на незаполненность ячейки поля
      */
-    static boolean isCellEmpty(int x, int y){
+    static boolean isCellEmpty(int x, int y) {
         return field[x][y] == DOT_EMPTY;
     }
 
     /**
      * Проверка корректности ввода
      * (координаты хода не должны превышать размерность массива, игрового поля)
+     *
      * @param x количество строк поля
      * @param y количество столбцов поля
      * @return признак незаполненной ячейки
      */
-    static boolean isCellValid(int x, int y){
-        return x >= 0 &&  x < fieldSizeX && y >= 0 && y < fieldSizeY;
+    static boolean isCellValid(int x, int y) {
+        return x >= 0 && x < fieldSizeRow && y >= 0 && y < fieldSizeCol;
     }
 
     /**
      * Ход компьютера
      */
-    private static void aiTurn(){
+    private static void aiTurn() {
         int x, y;
-        do
-        {
-            x = random.nextInt(fieldSizeX);
-            y = random.nextInt(fieldSizeY);
+        do {
+            x = random.nextInt(fieldSizeRow);
+            y = random.nextInt(fieldSizeCol);
         }
         while (!isCellEmpty(x, y));
         field[x][y] = DOT_AI;
     }
 
     /**
-     * Проверка победы
-     * TODO: Переработать метод в домашнем задании
-     * @param c
-     * @return
+     * Проверка максимального количества подряд идущих символов в поле
+     *
+     * @param symbol   проверяемый символ
+     * @param startRow стартовая строка
+     * @param startCol стартовый столбец
+     * @param direct   направление поиска (1 - по горизонтали, 2 - по вертикали, 3 - по диагонали, 4 - по обратной диагонали)
+     * @return макисмальное количество подряд идущих символов в поле по направлению direct
      */
-    static boolean checkWin(char c){
-        // Проверка по трем горизонталям
-        if (field[0][0] == c && field[0][1] == c && field[0][2] == c) return true;
-        if (field[1][0] == c && field[1][1] == c && field[1][2] == c) return true;
-        if (field[2][0] == c && field[2][1] == c && field[2][2] == c) return true;
+    static int checkCountSymbolNew(char symbol, int startRow, int startCol, int direct) {
+        int incrementRow = 0;
+        int incrementCol = 0;
+        int result = 0;
+        int curRow = startRow;
+        int curCol = startCol;
+        int countSymbol = 0;
+        char curSymbol;
 
-        // Проверка по диагоналям
-        if (field[0][0] == c && field[1][1] == c && field[2][2] == c) return true;
-        if (field[0][2] == c && field[1][1] == c && field[2][0] == c) return true;
+        switch (direct) {
+            case 1: // горизонталь
+                incrementRow = 0;
+                incrementCol = 1;
+                break;
 
-        // Проверка по трем вертикалям
-        if (field[0][0] == c && field[1][0] == c && field[2][0] == c) return true;
-        if (field[0][1] == c && field[1][1] == c && field[2][1] == c) return true;
-        if (field[0][2] == c && field[1][2] == c && field[2][2] == c) return true;
+            case 2: // вертикаль
+                incrementRow = 1;
+                incrementCol = 0;
+                break;
+            case 3: // прямая диагональ
+                incrementRow = 1;
+                incrementCol = 1;
+                break;
+            case 4: // обратная диагональ
+                incrementRow = 1;
+                incrementCol = -1;
+                break;
+        }
+
+        while (curRow >= 0 && curRow < fieldSizeRow && curCol >= 0 && curCol < fieldSizeCol) {
+            curSymbol = field[curRow][curCol];
+            if (curSymbol == symbol) {
+                countSymbol++;
+                if (countSymbol > result) {
+                    result = countSymbol;
+                }
+            } else {
+                countSymbol = 0;
+            }
+            curRow += incrementRow;
+            curCol += incrementCol;
+        }
+
+        return result;
+    }
+
+    static boolean checkWin(char c) {
+
+
+        // Проверка по горизонталям
+        for (int i = 0; i < fieldSizeRow; i++) {
+            if (checkCountSymbolNew(DOT_HUMAN, i, 0, 1) == WIN_COUNT || checkCountSymbolNew(DOT_AI, i, 0, 1) == WIN_COUNT) {
+                return true;
+            }
+        }
+
+        // Проверка по вертикалям
+        for (int j = 0; j < fieldSizeCol; j++) {
+            if (checkCountSymbolNew(DOT_HUMAN, 0, j, 2) == WIN_COUNT || checkCountSymbolNew(DOT_AI, 0, j, 2) == WIN_COUNT)
+                return true;
+        }
+
+
+        // Проверка по прямым диагоналям
+        // часть 1
+        for (int j = fieldSizeCol - 1; j >= 0; j--) {
+            if (checkCountSymbolNew(DOT_HUMAN, 0, j, 3) == WIN_COUNT || checkCountSymbolNew(DOT_AI, 0, j, 3) == WIN_COUNT) {
+                return true;
+            }
+        }
+
+        // часть 2
+        for (int i = 0; i < fieldSizeRow; i++) {
+            if (checkCountSymbolNew(DOT_HUMAN, i, 0, 3) == WIN_COUNT || checkCountSymbolNew(DOT_AI, i, 0, 3) == WIN_COUNT) {
+                return true;
+            }
+        }
+
+        // Проверка по обратным диагоналям
+        // часть 1
+        for (int j = 0; j < fieldSizeCol; j++) {
+            if (checkCountSymbolNew(DOT_HUMAN, 0, j, 4) == WIN_COUNT || checkCountSymbolNew(DOT_AI, 0, j, 4) == WIN_COUNT) {
+                return true;
+            }
+        }
+
+        // часть 2
+        for (int i = 1; i < fieldSizeRow; i++) {
+            if (checkCountSymbolNew(DOT_HUMAN, i, fieldSizeRow - 1, 4) == WIN_COUNT || checkCountSymbolNew(DOT_AI, i, fieldSizeRow - 1, 4) == WIN_COUNT) {
+                return true;
+            }
+        }
 
         return false;
     }
 
     /**
      * Проверка на ничью
+     *
      * @return
      */
-    static boolean checkDraw(){
-        for (int x = 0; x < fieldSizeX; x++){
-            for (int y = 0; y < fieldSizeY; y++)
+    static boolean checkDraw() {
+        for (int x = 0; x < fieldSizeRow; x++) {
+            for (int y = 0; y < fieldSizeCol; y++)
                 if (isCellEmpty(x, y)) return false;
         }
         return true;
@@ -182,16 +264,17 @@ public class Program {
 
     /**
      * Метод проверки состояния игры
+     *
      * @param c
      * @param str
      * @return
      */
-    static boolean gameCheck(char c, String str){
-        if (checkWin(c)){
+    static boolean gameCheck(char c, String str) {
+        if (checkWin(c)) {
             System.out.println(str);
             return true;
         }
-        if (checkDraw()){
+        if (checkDraw()) {
             System.out.println("Ничья!");
             return true;
         }
